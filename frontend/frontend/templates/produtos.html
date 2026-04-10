@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='produtos.css') }}">
+        <link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+crossorigin="anonymous"
+referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="styles.css">
+    <title>Cadastro de Produtos</title>
+</head>
+
+<body>
+    <button class="botao-menu">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <nav class="menu-lateral">
+        <ul>
+            <li>
+                <a href="#">
+                    <i class="fa-solid fa-house"></i>
+                    Home
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fa-solid fa-gifts"></i>
+                    Produtos
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fa-solid fa-cart-arrow-down"></i>
+                    Estoque
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="background"></div>
+        <main class="conteudo home">
+    <div class="hero">
+        <h4 class="text-h4">Atlas</h4>
+        <h1 class="text-h1"> Controle de Estoque Inteligente</h1> 
+        <h2 class="text-h2"> Somos uma solução prática e eficiente para gerenciar produtos de forma simples e organizada. Nosso objetivo é ajudar empresas a manter o controle total do estoque, com registro de entradas e saídas, alertas de baixo estoque e informações claras em tempo real, facilitando a tomada de decisões e evitando perdas.</h2>
+   </div>
+   <div id="banner">
+     <img src="static/estoque.webp" alt="">
+   </div>
+     
+</main>
+
+<script src="{{ url_for('static', filename='produtos.js') }}"></script>
+</body>
+</html>

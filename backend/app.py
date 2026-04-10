@@ -1,46 +1,51 @@
-from flask import Flask, jsonify, request
-import itertools
+from flask import Flask, jsonify, request, render_template
+from db import conectar
+from routes.login import login_bp
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    template_folder='../frontend/frontend/templates',
+    static_folder='../frontend/frontend/static'
+)
+@app.route('/produtos-page')
+def produtos_page():
+    return render_template("produtos.html")
 
-# 🔥 ID automático (corrige problema de duplicação)
-contador_id = itertools.count(1)
+app.register_blueprint(login_bp)
 
-produtos = [
-    {
-        'id': next(contador_id),
-        'nome': 'Arroz',
-        'codigo': '001',
-        'quantidade': 5
-    }
-]
-
-def verificar_status(qtd):
-    return "baixo" if qtd <= 10 else "normal"
+@app.route('/login-page')
+def login_page():
+    return render_template('login.html')
 
 
-# ✅ ROTA INICIAL
 @app.route('/')
 def home():
     return {"mensagem": "API rodando 🚀"}
 
 
-# ✅ LISTAR PRODUTOS + FILTRO
+# ✅ LISTAR PRODUTOS
 @app.route('/produtos', methods=['GET'])
 def listar_produtos():
 
-    status_filtro = request.args.get('status')
+    conn = conectar()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT id, nome, codigo, quantidade FROM produtos")
+
+    produtos = cursor.fetchall()
 
     lista = []
 
     for p in produtos:
-        produto = p.copy()
-        produto['status'] = verificar_status(p['quantidade'])
+        lista.append({
+            "id": p[0],
+            "nome": p[1],
+            "codigo": p[2],
+            "quantidade": p[3]
+        })
 
-        if status_filtro and produto['status'] != status_filtro:
-            continue
-
-        lista.append(produto)
+    cursor.close()
+    conn.close()
 
     return {
         "sucesso": True,
@@ -48,77 +53,107 @@ def listar_produtos():
     }
 
 
-# ✅ CADASTRAR PRODUTO COM VALIDAÇÃO
+# ✅ CADASTRAR PRODUTO
 @app.route('/produtos', methods=['POST'])
 def cadastrar_produto():
 
     dados = request.get_json()
 
-    # 🔥 validações
     if not dados:
         return {"erro": "JSON inválido"}, 400
 
-    if not dados.get("nome") or not dados.get("codigo"):
-        return {"erro": "Nome e código são obrigatórios"}, 400
+    conn = conectar()
+    cursor = conn.cursor()
 
-    if type(dados.get("quantidade")) != int:
-        return {"erro": "Quantidade deve ser número"}, 400
+    cursor.execute("""
+        INSERT INTO produtos (nome, codigo, quantidade)
+        VALUES (%s, %s, %s)
+        RETURNING id
+    """, (dados['nome'], dados['codigo'], dados['quantidade']))
 
-    # 🔥 evitar código duplicado
-    for p in produtos:
-        if p['codigo'] == dados.get("codigo"):
-            return {"erro": "Código já existe"}, 400
+    id = cursor.fetchone()[0]
 
-    novo_produto = {
-        "id": next(contador_id),
-        "nome": dados.get("nome"),
-        "codigo": dados.get("codigo"),
-        "quantidade": dados.get("quantidade")
-    }
+    conn.commit()
 
-    produtos.append(novo_produto)
-
-    novo_produto["status"] = verificar_status(novo_produto["quantidade"])
+    cursor.close()
+    conn.close()
 
     return {
         "sucesso": True,
-        "dados": novo_produto
+        "id": id
     }, 201
+# ✅ REGISTRAR MOVIMENTAÇÃO
+@app.route('/movimentacao', methods=['POST'])
+def registrar_movimentacao():
 
+    dados = request.get_json()
 
-# 🔥 ATUALIZAR OU DELETAR
-@app.route('/produtos/<int:id>', methods=['PUT', 'DELETE'])
-def manipular_produto(id):
+    if not dados:
+        return {"erro": "JSON inválido"}, 400
 
-    # 👉 ATUALIZAR
-    if request.method == 'PUT':
-        dados = request.get_json()
+    produto_id = dados.get("produto_id")
+    tipo = dados.get("tipo")
+    quantidade = dados.get("quantidade")
+    observacao = dados.get("observacao", "")
 
-        for p in produtos:
-            if p['id'] == id:
+    if not produto_id or not tipo or not quantidade:
+        return {"erro": "Dados obrigatórios faltando"}, 400
 
-                p['nome'] = dados.get("nome", p['nome'])
-                p['codigo'] = dados.get("codigo", p['codigo'])
-                p['quantidade'] = dados.get("quantidade", p['quantidade'])
+    if quantidade <= 0:
+        return {"erro": "Quantidade inválida"}, 400
 
-                p['status'] = verificar_status(p['quantidade'])
+    conn = conectar()
+    cursor = conn.cursor()
 
-                return {
-                    "sucesso": True,
-                    "dados": p
-                }
+    try:
+        cursor.execute(
+            "SELECT quantidade FROM produtos WHERE id = %s",
+            (produto_id,)
+        )
+        resultado = cursor.fetchone()
 
-        return {"erro": "Produto não encontrado"}, 404
+        if not resultado:
+            return {"erro": "Produto não encontrado"}, 404
 
-    # 👉 DELETAR
-    elif request.method == 'DELETE':
+        estoque_atual = resultado[0]
 
-        for p in produtos:
-            if p['id'] == id:
-                produtos.remove(p)
-                return {"mensagem": "Produto removido com sucesso"}
+        if tipo == "entrada":
+            novo_estoque = estoque_atual + quantidade
 
-        return {"erro": "Produto não encontrado"}, 404
+        elif tipo == "saida":
+            if estoque_atual < quantidade:
+                return {"erro": "Estoque insuficiente"}, 400
+            novo_estoque = estoque_atual - quantidade
+
+        else:
+            return {"erro": "Tipo inválido"}, 400
+
+        cursor.execute(
+            "UPDATE produtos SET quantidade = %s WHERE id = %s",
+            (novo_estoque, produto_id)
+        )
+
+        cursor.execute("""
+            INSERT INTO movimentacoes (produto_id, tipo, quantidade, data, observacao)
+            VALUES (%s, %s, %s, NOW(), %s)
+        """, (produto_id, tipo, quantidade, observacao))
+
+        conn.commit()
+
+    except Exception as e:
+        conn.rollback()
+        return {"erro": str(e)}, 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+    return {
+        "sucesso": True,
+        "mensagem": "Movimentação registrada",
+        "estoque_atual": novo_estoque
+    }
+
 
 
 if __name__ == '__main__':

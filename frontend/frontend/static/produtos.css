@@ -1,0 +1,137 @@
+:root {
+    --primary-colo: #3cabf5;
+    --secondary-color: #3c95d1;
+    --text-color: #ecf0f1;
+    --text-secondary-color: #000f1f;
+    --background-color: #34495e;
+
+}
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--text-color);
+    transition: background-color 0.5s ease;
+}
+
+.menu-lateral {
+    position: fixed;
+    left: -300px;
+    top: 0;
+    width: 300px;
+    height: 100%;
+    background-color: var(--background-color);
+    z-index: 5;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.menu-lateral.ativo {
+   left: 0;
+}
+
+.menu-lateral ul {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 60px;
+}
+
+.menu-lateral ul li {
+    padding: 15px 30px;
+}
+
+.menu-lateral ul li a {
+    text-decoration: none;
+    color: var(--text-color);
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px
+}
+
+.menu-lateral ul li a i {
+    font-size: 24px;
+}
+
+.menu-lateral ul li:hover {
+    background-color: var(--secondary-color);
+}
+
+.menu-lateral ul li a i:hover {
+    transform: translate(5px) rotate(5deg);
+}
+
+
+.botao-menu {
+    background-color: var(--primary-colo);
+    position: fixed;
+    left: 20px;
+    top: 20px;
+    z-index: 6;
+    border-radius: 5px;
+    font-size: 18px;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    color: var(--text-color);
+    transition: all 0.5s ease-in-out;
+}
+
+.botao-menu:hover {
+    background-color: var(--secondary-color);
+}
+
+.botao-menu.ativo {
+    left: 320px;
+}
+
+.conteudo {
+    margin-left: 80px;
+    padding: 40px;
+    color: var(--text-secondary-color);
+    background-color: var(--text-color);
+    transition: all 0.5s ease;
+
+}
+
+.conteudo.ativo {
+    margin-left: 310px;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    z-index: 4;
+}
+
+.background.ativo {
+    opacity: 1;
+    visibility: visible;
+}
+
+.hero h1 {
+    font-size: 80px;
+    color: var(--primary-color);
+    text-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+    line-height: 5rem;
+}
+.hero h4 {
+    font-size: 50px;
+    color: #3c95d1;
+    margin-bottom: 1rem;
+    line-height: 1rem;
+}
+.hero h2 {
+    margin-bottom: 1rem;
+    line-height: 2rem;
+    font-size: 20px;
+    color:#6488ad
+}

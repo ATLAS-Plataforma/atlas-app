@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@380&display=swap" rel="stylesheet">
+    <title>Tela de Login</title>
+</head>
+
+<body>
+    <div class="container">
+        <form id="loginForm">
+            <h1>Controle de Estoque Inteligente</h1>
+
+            <div class="input-container"> 
+              <input id="email" name="email" placeholder="Email" type="email" required>
+              <img width="18" height="18" src="https://img.icons8.com/ios-filled/50/filled-message.png">
+            </div>
+
+            <div class="input-container"> 
+                <input id="senha" name="senha" placeholder="Senha" type="password" required>
+                <img width="18" height="18" src="https://img.icons8.com/ios-glyphs/30/lock--v1.png">
+                <a href="#">Esqueci minha senha</a>
+            </div>
+
+            <button type="submit" class="submit-button">Entrar</button>
+
+            <div class="register-link">
+                <p>Não esta cadastrado ? <a href="#">Cadastrar</a></p>
+            </div>
+        </form>
+    </div>
+
+<script>
+document.getElementById("loginForm").addEventListener("submit", async function(e){
+
+    e.preventDefault();
+
+    const email = document.getElementById("email").value
+    const senha = document.getElementById("senha").value
+
+    const resposta = await fetch("/login", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            email: email,
+            senha: senha
+        })
+    })
+
+    const dados = await resposta.json()
+
+    if(dados.sucesso){
+        alert("Login realizado!")
+        window.location.href = "/produtos-page"
+    }else{
+        alert(dados.mensagem)
+    }
+
+})
+</script>
+
+</body>
+</html>
