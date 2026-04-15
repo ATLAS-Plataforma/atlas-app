@@ -1,12 +1,13 @@
 from flask import Flask, jsonify, request, render_template
 from db import conectar
-from routes.login import login_bp
+from login import login_bp
 
 app = Flask(
     __name__,
     template_folder='../frontend/frontend/templates',
     static_folder='../frontend/frontend/static'
 )
+
 @app.route('/produtos-page')
 def produtos_page():
     return render_template("produtos.html")
@@ -17,6 +18,9 @@ app.register_blueprint(login_bp)
 def login_page():
     return render_template('login.html')
 
+@app.route('/movimentacao-page')
+def movimentacao_page():
+    return render_template('movimentacao.html')
 
 @app.route('/')
 def home():

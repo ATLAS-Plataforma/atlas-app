@@ -34,7 +34,7 @@ referrerpolicy="no-referrer" />
                 </a>
             </li>
             <li>
-                <a href="#">
+                <a href="/movimentacao-page">
                     <i class="fa-solid fa-cart-arrow-down"></i>
                     Estoque
                 </a>
@@ -50,7 +50,7 @@ referrerpolicy="no-referrer" />
         <h2 class="text-h2"> Somos uma solução prática e eficiente para gerenciar produtos de forma simples e organizada. Nosso objetivo é ajudar empresas a manter o controle total do estoque, com registro de entradas e saídas, alertas de baixo estoque e informações claras em tempo real, facilitando a tomada de decisões e evitando perdas.</h2>
    </div>
    <div id="banner">
-     <img src="static/estoque.webp" alt="">
+     <img src="{{ url_for('static', filename='estoque.webp') }}">
    </div>
      
 </main>

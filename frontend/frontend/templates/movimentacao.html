@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Movimentação de Estoque</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='movimentacao.css') }}">
+</head>
+<body>
+
+<div class="fundo">
+  <div class="card-grande">
+
+    <div class="container">
+
+      <div class="titulo">
+        <img src="icone-de-deposito.webp" alt="icone">
+        <h2>Registrar Movimentação</h2>
+      </div>
+
+      <label>Produto</label>
+      <input type="text" id="produto" placeholder="Digite o produto">
+
+      <label>Tipo de Movimentação</label>
+      <div class="tipo">
+        <button onclick="selecionarTipo('entrada')" id="entrada">Entrada</button>
+        <button onclick="selecionarTipo('saida')" id="saida">Saída</button>
+      </div>
+
+      <label>Quantidade</label>
+      <input type="number" id="quantidade" placeholder="Ex: 10">
+
+      <label>Data</label>
+      <input type="date">
+
+      <button class="registrar" onclick="registrar()">+ REGISTRAR MOVIMENTAÇÃO</button>
+
+<div class="alerta-azul">
+    <img src="https://cdn-icons-png.flaticon.com/512/471/471663.png" width="18" style="margin-bottom: 0; margin-right: 10px;">
+    <span><strong>Atenção:</strong> Para saída, será verificado se há quantidade suficiente em estoque.</span>
+</div>
+
+<p id="mensagem"></p>
+
+    </div>
+
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='movimentacao.js') }}"></script>
+</body>
+</html>
