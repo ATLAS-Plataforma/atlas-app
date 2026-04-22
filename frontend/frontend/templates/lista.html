@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@380&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='lista.css') }}">
+    <title>Produtos</title>
+</head>
+<body>
+
+<div class="container">
+    <h1>Produtos</h1>
+
+    <div class="input-container"> 
+        <input id="busca" placeholder="Buscar produto" type="text">
+        <img width="28" height="28"
+        src="https://img.icons8.com/ios-filled/50/search--v1.png"/>
+    </div>  
+
+    <section class="menu">
+        <h2 class="title">Lista de Produtos</h2>
+         
+        <div class="box-container">
+
+            <div class="box">
+                <h3>Arroz</h3>
+                <div class="text">Código</div>
+                <div class="text">ARZ-001</div>
+                <img src="{{ url_for('static', filename='imagens/Arroz.png') }}">
+            </div>
+
+            <div class="box">
+                <h3>Feijão</h3>
+                <div class="text">Código</div>
+                <div class="text">FJ-002</div>
+                <img src="{{ url_for('static', filename='imagens/Feijao.png') }}">
+            </div>
+
+            <div class="box">
+                <h3>Açucar Refinado</h3>
+                <div class="text">Código</div>
+                <div class="text">ACR-003</div>
+                <img src="{{ url_for('static', filename='imagens/Açucar.png') }}">
+            </div>
+
+            <div class="box">
+                <h3>Café</h3>
+                <div class="text">Código</div>
+                <div class="text">CF-004</div>
+                <img src="{{ url_for('static', filename='imagens/Cafe.png') }}">
+            </div>
+
+            <div class="box">
+                <h3>Óleo de Soja</h3>
+                <div class="text">Código</div>
+                <div class="text">OL-005</div>
+                <img src="{{ url_for('static', filename='imagens/Oleo.png') }}">
+            </div>
+
+            <div class="box">
+                <h3>Leite Integral</h3>
+                <div class="text">Código</div>
+                <div class="text">LT-006</div>
+                <img src="{{ url_for('static', filename='imagens/Leite.png') }}">
+            </div>
+
+            <div class="box">
+                <h3>Sal</h3>
+                <div class="text">Código</div>
+                <div class="text">SAL-007</div>
+                <img src="{{ url_for('static', filename='imagens/Sal.png') }}">
+            </div>
+
+            <div class="box">
+                <h3>Ovos</h3>
+                <div class="text">Código</div>
+                <div class="text">OVO-008</div>
+                <img src="{{ url_for('static', filename='imagens/Ovo.png') }}">
+            </div>
+
+            <div class="box">
+                <h3>Macarrão</h3>
+                <div class="text">Código</div>
+                <div class="text">MSS-009</div>
+                <img src="{{ url_for('static', filename='imagens/Macarrão.png') }}">
+            </div>
+
+            <div class="box">
+                <h3>Detergente</h3>
+                <div class="text">Código</div>
+                <div class="text">DT-0010</div>
+                <img src="{{ url_for('static', filename='imagens/Detergente.png') }}">
+            </div>
+
+        </div>
+
+    </section>
+</div>
+
+<!-- 🔥 JS SIMPLES E FUNCIONANDO -->
+<script>
+const input = document.getElementById('busca')
+const produtos = document.querySelectorAll('.box')
+
+input.addEventListener('keyup', () => {
+    const termo = input.value.toLowerCase()
+
+    produtos.forEach(produto => {
+        const nome = produto.querySelector('h3').textContent.toLowerCase()
+
+        if (nome.includes(termo)) {
+            produto.style.display = "block"
+        } else {
+            produto.style.display = "none"
+        }
+    })
+})
+</script>
+
+</body>
+</html>

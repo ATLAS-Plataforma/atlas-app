@@ -9,6 +9,7 @@ body {
   background: #eef2f7;
 }
 
+/* FUNDO */
 .fundo {
   display: flex;
   justify-content: center;
@@ -17,6 +18,7 @@ body {
   padding-top: 30px;
 }
 
+/* CARD PRINCIPAL */
 .card-grande {
   background: #fff;
   width: 1500px;
@@ -26,12 +28,22 @@ body {
   padding: 40px;
 
   display: flex;
+  gap: 40px; /* espaço entre esquerda e direita */
 }
 
+/* LADO ESQUERDO */
 .container {
-  width: 500px;
+  width: 800px;
+  display: flex;
+  flex-direction: column;
 }
 
+/* LADO DIREITO */
+.lado-direito {
+  width: 400px;
+}
+
+/* TÍTULO */
 .titulo {
   display: flex;
   align-items: center;
@@ -47,12 +59,13 @@ body {
   font-size: 20px;
 }
 
+/* INPUTS */
 label {
   font-size: 14px;
   font-weight: 500;
 }
 
-input {
+input, select {
   width: 100%;
   padding: 10px;
   margin: 8px 0 18px;
@@ -60,6 +73,7 @@ input {
   border-radius: 6px;
 }
 
+/* BOTÕES ENTRADA / SAÍDA */
 .tipo {
   display: flex;
   gap: 10px;
@@ -85,6 +99,7 @@ input {
   color: white;
 }
 
+/* BOTÃO REGISTRAR */
 .registrar {
   width: 100%;
   padding: 12px;
@@ -96,25 +111,174 @@ input {
   cursor: pointer;
 }
 
-.container {
-    width: 780px;
-    display: flex;
-    flex-direction: column;
+.registrar:hover {
+  background: #1e4fc1;
 }
 
+/* ALERTA AZUL */
 .alerta-azul {
-    display: flex;
-    align-items: center;
-    background-color: #e8f0fe; 
-    border-radius: 8px;
-    padding: 15px;
-    margin-top: 20px; 
-    color: #1967d2; 
-    font-size: 13px;
-    border: 1px solid #d2e3fc;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #e8f0fe; 
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 20px; 
+  color: #1967d2; 
+  font-size: 13px;
+  border: 1px solid #d2e3fc;
 }
 
 .alerta-azul img {
-    width: 20px;
-    height: 20px;
+  width: 20px;
+}
+
+/* CARD HISTÓRICO */
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 30px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* FILTRO */
+.form {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.form input,
+.form select {
+  margin: 0;
+}
+
+/* BOTÃO PADRÃO */
+button {
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  background: #2f6fed;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #1e4fc1;
+}
+
+/* TABELA */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  background: #f1f3f5;
+  padding: 12px;
+  text-align: left;
+}
+
+td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+/* TAGS */
+.tag {
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.entrada {
+  background: #d4edda;
+  color: #155724;
+}
+
+.saida {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* ========================= */
+/* 🔥 CARD DE ESTOQUE */
+/* ========================= */
+
+.card-estoque {
+  font-family: 'Poppins', sans-serif;
+}
+
+.titulo-estoque {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.titulo-estoque h3 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.icone {
+  background: #2f6fed;
+  color: white;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+/* BOX INTERNO */
+.box-estoque {
+  background: #eaf2ff;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.subtitulo {
+  font-size: 13px;
+  color: #666;
+}
+
+.codigo {
+  font-size: 12px;
+  color: #777;
+  margin-bottom: 10px;
+}
+
+/* INFO */
+.info-estoque {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.linha {
+  width: 1px;
+  height: 60px;
+  background: #ccc;
+}
+
+/* CORES */
+.azul {
+  color: #2f6fed;
+}
+
+.laranja {
+  color: #ff7a00;
+}
+
+/* ALERTA AMARELO */
+.alerta-amarelo {
+  margin-top: 15px;
+  background: #fff3cd;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #856404;
+  text-align: center;
 }

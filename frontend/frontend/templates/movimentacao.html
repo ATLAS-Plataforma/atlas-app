@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title>Movimentação de Estoque</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='movimentacao.css') }}">
 </head>
+
 <body>
 
 <div class="fundo">
   <div class="card-grande">
 
+    <!-- ESQUERDA -->
     <div class="container">
 
       <div class="titulo">
-        <img src="icone-de-deposito.webp" alt="icone">
+        <img src="{{ url_for('static', filename='icone-de-deposito.webp') }}">
         <h2>Registrar Movimentação</h2>
       </div>
 
@@ -28,19 +31,101 @@
       </div>
 
       <label>Quantidade</label>
-      <input type="number" id="quantidade" placeholder="Ex: 10">
+      <input type="number" id="quantidade" placeholder="Ex:10">
 
       <label>Data</label>
-      <input type="date">
+      <input type="date" id="dataMovimentacao">
 
-      <button class="registrar" onclick="registrar()">+ REGISTRAR MOVIMENTAÇÃO</button>
+      <button class="registrar" onclick="registrar()">REGISTRAR MOVIMENTAÇÃO</button>
+      
 
-<div class="alerta-azul">
+      <div class="alerta-azul">
     <img src="https://cdn-icons-png.flaticon.com/512/471/471663.png" width="18" style="margin-bottom: 0; margin-right: 10px;">
     <span><strong>Atenção:</strong> Para saída, será verificado se há quantidade suficiente em estoque.</span>
 </div>
 
 <p id="mensagem"></p>
+
+      <!-- HISTÓRICO -->
+      <div class="card">
+        <h3>Histórico</h3>
+
+        <div class="form">
+          <input type="text" id="produtoFiltro" placeholder="Produto">
+          <select id="tipoFiltro">
+            <option value="">Todos</option>
+            <option value="entrada">Entrada</option>
+            <option value="saida">Saída</option>
+          </select>
+          <input type="number" id="quantidadeFiltro" placeholder="Qtd">
+          <button onclick="carregarHistorico()">Atualizar</button>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Produto</th>
+              <th>Tipo</th>
+              <th>Qtd</th>
+            </tr>
+          </thead>
+          <tbody id="tabela"></tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- DIREITA -->
+    <div class="lado-direito">
+
+      <!-- SELECT PRODUTO -->
+      <select id="selecionarProduto" onchange="trocarProduto()">
+  <option value="arroz">Arroz</option>
+  <option value="feijao">Feijão</option>
+  <option value="acucar">Açúcar</option>
+  <option value="cafe">Café</option>
+  <option value="oleo">Óleo</option>
+  <option value="leite">Leite</option>
+  <option value="sal">Sal</option>
+  <option value="ovos">Ovos</option>
+  <option value="macarrao">Macarrão</option>
+  <option value="detergente">Detergente</option>
+</select>
+
+      </select>
+
+      <div class="card-estoque">
+
+        <div class="titulo-estoque">
+          <span class="icone">🏠</span>
+          <h3>ESTOQUE ATUAL</h3>
+        </div>
+
+        <div class="box-estoque">
+          <h2 id="nomeProduto">ARROZ</h2>
+          <p>Código: <span id="codigoProduto">ARZ-001</span></p>
+
+          <div class="info-estoque">
+            <div>
+              <p>Atual</p>
+              <h1 id="estoqueAtual">12</h1>
+            </div>
+
+            <div class="linha"></div>
+
+            <div>
+              <p>Mínimo</p>
+              <h1 id="estoqueMinimo">5</h1>
+            </div>
+          </div>
+        </div>
+
+        <div class="alerta-amarelo" id="alertaEstoque">
+          ⚠️ Estoque baixo
+        </div>
+
+      </div>
 
     </div>
 
@@ -48,5 +133,6 @@
 </div>
 
 <script src="{{ url_for('static', filename='movimentacao.js') }}"></script>
+
 </body>
 </html>
