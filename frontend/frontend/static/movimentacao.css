@@ -209,6 +209,8 @@ td {
 
 .card-estoque {
   font-family: 'Poppins', sans-serif;
+  width: 450px;
+  margin: 20px;
 }
 
 .titulo-estoque {
@@ -234,7 +236,7 @@ td {
 .box-estoque {
   background: #eaf2ff;
   border-radius: 12px;
-  padding: 20px;
+  padding: 30px;
   text-align: center;
 }
 
@@ -246,7 +248,7 @@ td {
 .codigo {
   font-size: 12px;
   color: #777;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 /* INFO */
@@ -254,7 +256,7 @@ td {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  margin-top: 15px;
+  margin-top: 40px;
 }
 
 .linha {

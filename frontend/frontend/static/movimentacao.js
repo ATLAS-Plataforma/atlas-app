@@ -39,7 +39,6 @@ function atualizarCard(produtoKey) {
     const minimoEl = document.getElementById("estoqueMinimo");
     const alerta = document.getElementById("alertaEstoque");
 
-    // 🔥 limpa antes de carregar
     estoqueEl.innerText = "-";
 
     fetch(`http://localhost:5000/produto/${nome}?t=${new Date().getTime()}`)
@@ -49,7 +48,6 @@ function atualizarCard(produtoKey) {
         const minimo = produtos[produtoKey].minimo;
         minimoEl.innerText = minimo;
 
-        // ❌ erro ou não encontrado
         if (p.erro || !p.nome || !p.codigo) {
             nomeEl.innerText = "Produto não encontrado";
             codigoEl.innerText = "-";
@@ -58,26 +56,39 @@ function atualizarCard(produtoKey) {
             return;
         }
 
-        // ✅ dados corretos
         nomeEl.innerText = p.nome;
         codigoEl.innerText = p.codigo;
 
         const estoque = p.estoque;
 
-        // 🔥 MOSTRAR VALOR REAL DO BANCO
         estoqueEl.innerText =
             (estoque === null || estoque === undefined)
                 ? "-"
                 : estoque;
 
-        // ⚠️ alerta de estoque baixo
-        if (estoque < minimo) {
-    alerta.style.display = "block";
-    alerta.innerText = "⚠️ Estoque baixo!";
-} else {
-    alerta.style.display = "block";
-    alerta.innerText = "✅ Estoque normal";
-}
+        // 🚨 ERRO: estoque negativo
+        if (estoque < 0) {
+            alerta.style.display = "block";
+            alerta.innerText = "❌ Erro: estoque negativo! Não é possível ter valor menor que 0.";
+            alerta.style.background = "#f8d7da";
+            alerta.style.color = "#721c24";
+        }
+
+        // ⚠️ estoque baixo
+        else if (estoque < minimo) {
+            alerta.style.display = "block";
+            alerta.innerText = "⚠️ Estoque baixo!";
+            alerta.style.background = "#fff3cd";
+            alerta.style.color = "#856404";
+        }
+
+        // ✅ estoque normal
+        else {
+            alerta.style.display = "block";
+            alerta.innerText = "✅ Estoque normal";
+            alerta.style.background = "#d4edda";
+            alerta.style.color = "#155724";
+        }
 
     })
     .catch(err => {
@@ -93,13 +104,25 @@ function atualizarCard(produtoKey) {
 // 🔹 REGISTRAR MOVIMENTAÇÃO
 function registrar() {
 
-    const produtoNome = document.getElementById("produto").value;
+    const produtoKey = document.getElementById("selecionarProduto").value;
+    const produtoNome = produtos[produtoKey].nome;
+
     const quantidade = parseInt(document.getElementById("quantidade").value);
     const data = new Date().toLocaleString("sv-SE").replace(" ", "T");
 
     if (!produtoNome || !quantidade || !tipoSelecionado) {
         alert("Preencha todos os campos!");
         return;
+    }
+
+    // 🚨 BLOQUEAR SAÍDA MAIOR QUE ESTOQUE
+    if (tipoSelecionado === "saida") {
+        const estoqueAtual = parseInt(document.getElementById("estoqueAtual").innerText);
+
+        if (quantidade > estoqueAtual) {
+            alert("❌ Não é possível fazer saída maior que o estoque!");
+            return;
+        }
     }
 
     fetch("http://localhost:5000/movimentacao", {
@@ -124,19 +147,11 @@ function registrar() {
             msg.innerText = "✅ " + data.mensagem;
             msg.style.color = "green";
 
-            document.getElementById("produto").value = "";
             document.getElementById("quantidade").value = "";
-
             tipoSelecionado = "";
 
-            document.getElementById("entrada").style.opacity = "1";
-            document.getElementById("saida").style.opacity = "1";
-
             carregarHistorico();
-
-            // 🔥 ATUALIZA CARD COM VALOR DO BANCO
-            const select = document.getElementById("selecionarProduto");
-            atualizarCard(select.value);
+            atualizarCard(produtoKey);
 
         } else {
             msg.innerText = "❌ " + (data.erro || "Erro ao registrar");
@@ -154,6 +169,10 @@ function registrar() {
 // 🔹 HISTÓRICO
 function carregarHistorico() {
 
+    const produto = document.getElementById("produtoFiltro").value;
+    const tipo = document.getElementById("tipoFiltro").value;
+    const qtd = document.getElementById("quantidadeFiltro").value;
+
     fetch("http://localhost:5000/movimentacoes")
     .then(res => res.json())
     .then(dados => {
@@ -161,9 +180,17 @@ function carregarHistorico() {
         const tabela = document.getElementById("tabela");
         tabela.innerHTML = "";
 
-        dados.forEach(item => {
+        dados
+        .filter(item => {
+            return (
+                (!produto || item.produto === produto) &&
+                (!tipo || item.tipo === tipo) &&
+                (!qtd || item.quantidade == qtd)
+            );
+        })
+        .forEach(item => {
 
-            const tipo = item.tipo.toUpperCase();
+            const tipoUpper = item.tipo.toUpperCase();
 
             const linha = document.createElement("tr");
 
@@ -171,8 +198,8 @@ function carregarHistorico() {
                 <td>${new Date(item.data).toLocaleString('pt-BR')}</td>
                 <td>${item.produto}</td>
                 <td>
-                    <span class="tag ${tipo === 'ENTRADA' ? 'entrada' : 'saida'}">
-                        ${tipo === 'ENTRADA' ? '⬆ ENTRADA' : '⬇ SAÍDA'}
+                    <span class="tag ${tipoUpper === 'ENTRADA' ? 'entrada' : 'saida'}">
+                        ${tipoUpper === 'ENTRADA' ? '⬆ ENTRADA' : '⬇ SAÍDA'}
                     </span>
                 </td>
                 <td>${item.quantidade}</td>
@@ -186,9 +213,8 @@ function carregarHistorico() {
         console.error("Erro ao carregar histórico:", err);
     });
 }
-
 // 🔹 INICIAR
 window.onload = function() {
     carregarHistorico();
-    atualizarCard("arroz"); // 🔥 já carrega certo ao abrir
+    atualizarCard("arroz");
 };

@@ -22,7 +22,18 @@
       </div>
 
       <label>Produto</label>
-      <input type="text" id="produto" placeholder="Digite o produto">
+<select id="selecionarProduto" onchange="trocarProduto()">
+  <option value="arroz">Arroz</option>
+  <option value="feijao">Feijão</option>
+  <option value="acucar">Açúcar</option>
+  <option value="cafe">Café</option>
+  <option value="oleo">Óleo</option>
+  <option value="leite">Leite</option>
+  <option value="sal">Sal</option>
+  <option value="ovos">Ovos</option>
+  <option value="macarrao">Macarrão</option>
+  <option value="detergente">Detergente</option>
+</select>
 
       <label>Tipo de Movimentação</label>
       <div class="tipo">
@@ -33,8 +44,7 @@
       <label>Quantidade</label>
       <input type="number" id="quantidade" placeholder="Ex:10">
 
-      <label>Data</label>
-      <input type="date" id="dataMovimentacao">
+      
 
       <button class="registrar" onclick="registrar()">REGISTRAR MOVIMENTAÇÃO</button>
       
@@ -48,17 +58,30 @@
 
       <!-- HISTÓRICO -->
       <div class="card">
-        <h3>Histórico</h3>
+        <h3>Histórico de movimentação</h3>
 
         <div class="form">
-          <input type="text" id="produtoFiltro" placeholder="Produto">
+          
+<select id="produtoFiltro">
+  <option value="">Todos</option>
+  <option value="Arroz">Arroz</option>
+  <option value="Feijão">Feijão</option>
+  <option value="Açúcar">Açúcar</option>
+  <option value="Café">Café</option>
+  <option value="Óleo">Óleo</option>
+  <option value="Leite">Leite</option>
+  <option value="Sal">Sal</option>
+  <option value="Ovos">Ovos</option>
+  <option value="Macarrão">Macarrão</option>
+  <option value="Detergente">Detergente</option>
+</select>
           <select id="tipoFiltro">
             <option value="">Todos</option>
             <option value="entrada">Entrada</option>
             <option value="saida">Saída</option>
           </select>
           <input type="number" id="quantidadeFiltro" placeholder="Qtd">
-          <button onclick="carregarHistorico()">Atualizar</button>
+          <button type="button" onclick="carregarHistorico()">Atualizar</button>
         </div>
 
         <table>
@@ -76,22 +99,7 @@
 
     </div>
 
-    <!-- DIREITA -->
-    <div class="lado-direito">
-
-      <!-- SELECT PRODUTO -->
-      <select id="selecionarProduto" onchange="trocarProduto()">
-  <option value="arroz">Arroz</option>
-  <option value="feijao">Feijão</option>
-  <option value="acucar">Açúcar</option>
-  <option value="cafe">Café</option>
-  <option value="oleo">Óleo</option>
-  <option value="leite">Leite</option>
-  <option value="sal">Sal</option>
-  <option value="ovos">Ovos</option>
-  <option value="macarrao">Macarrão</option>
-  <option value="detergente">Detergente</option>
-</select>
+   
 
       </select>
 
