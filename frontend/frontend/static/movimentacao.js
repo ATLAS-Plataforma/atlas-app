@@ -1,105 +1,177 @@
 let tipoSelecionado = "";
+let produtos = {};
 
-// 🔹 PRODUTOS
-const produtos = {
-    arroz: { nome: "Arroz", codigo: "ARZ-001", minimo: 20 },
-    feijao: { nome: "Feijão", codigo: "FJ-002", minimo: 20 },
-    acucar: { nome: "Açúcar", codigo: "ACR-003", minimo: 20 },
-    cafe: { nome: "Café", codigo: "CF-004", minimo: 20 },
-    oleo: { nome: "Óleo", codigo: "OL-005", minimo: 20 },
-    leite: { nome: "Leite", codigo: "LT-006", minimo: 20 },
-    sal: { nome: "Sal", codigo: "SAL-007", minimo: 20 },
-    ovos: { nome: "Ovos", codigo: "OVO-008", minimo: 20 },
-    macarrao: { nome: "Macarrão", codigo: "MSS-009", minimo: 20 },
-    detergente: { nome: "Detergente", codigo: "DT-010", minimo: 20 }
+// INICIAR
+window.onload = function () {
+    carregarProdutos();
+    carregarHistorico();
 };
 
-// 🔹 TROCAR PRODUTO
-function trocarProduto() {
-    const produtoSelecionado = document.getElementById("selecionarProduto").value;
-    atualizarCard(produtoSelecionado);
-}
+// ======================
+// CARREGAR PRODUTOS
+// ======================
+function carregarProdutos() {
 
-// 🔹 SELECIONAR TIPO
-function selecionarTipo(tipo) {
-    tipoSelecionado = tipo;
-
-    document.getElementById("entrada").style.opacity = tipo === "entrada" ? "1" : "0.5";
-    document.getElementById("saida").style.opacity = tipo === "saida" ? "1" : "0.5";
-}
-
-// 🔹 ATUALIZAR CARD
-function atualizarCard(produtoKey) {
-
-    const nome = produtos[produtoKey].nome;
-
-    const nomeEl = document.getElementById("nomeProduto");
-    const codigoEl = document.getElementById("codigoProduto");
-    const estoqueEl = document.getElementById("estoqueAtual");
-    const minimoEl = document.getElementById("estoqueMinimo");
-    const alerta = document.getElementById("alertaEstoque");
-
-    // 🔥 limpa antes de carregar
-    estoqueEl.innerText = "-";
-
-    fetch(`http://localhost:5000/produto/${nome}?t=${new Date().getTime()}`)
+    fetch("http://localhost:5000/produtos")
     .then(res => res.json())
-    .then(p => {
+    .then(res => {
 
-        const minimo = produtos[produtoKey].minimo;
-        minimoEl.innerText = minimo;
+        const lista = res.dados;
 
-        // ❌ erro ou não encontrado
-        if (p.erro || !p.nome || !p.codigo) {
-            nomeEl.innerText = "Produto não encontrado";
-            codigoEl.innerText = "-";
-            estoqueEl.innerText = "-";
-            alerta.style.display = "none";
-            return;
+        const select = document.getElementById("selecionarProduto");
+        const filtro = document.getElementById("produtoFiltro");
+
+        select.innerHTML = "";
+        filtro.innerHTML = '<option value="">Todos</option>';
+
+        produtos = {};
+
+        lista.forEach(produto => {
+
+            const key = produto.nome;
+            produtos[key] = produto;
+
+            select.innerHTML += `
+                <option value="${produto.nome}">
+                    ${produto.nome}
+                </option>
+            `;
+
+            filtro.innerHTML += `
+                <option value="${produto.nome}">
+                    ${produto.nome}
+                </option>
+            `;
+        });
+
+        const primeiro = lista[0];
+
+        if (primeiro) {
+            atualizarCard(primeiro.nome);
         }
 
-        // ✅ dados corretos
-        nomeEl.innerText = p.nome;
-        codigoEl.innerText = p.codigo;
-
-        const estoque = p.estoque;
-
-        // 🔥 MOSTRAR VALOR REAL DO BANCO
-        estoqueEl.innerText =
-            (estoque === null || estoque === undefined)
-                ? "-"
-                : estoque;
-
-        // ⚠️ alerta de estoque baixo
-        if (estoque < minimo) {
-    alerta.style.display = "block";
-    alerta.innerText = "⚠️ Estoque baixo!";
-} else {
-    alerta.style.display = "block";
-    alerta.innerText = "✅ Estoque normal";
-}
-
-    })
-    .catch(err => {
-        console.error("Erro:", err);
-
-        nomeEl.innerText = "Erro ao conectar";
-        codigoEl.innerText = "-";
-        estoqueEl.innerText = "-";
-        alerta.style.display = "none";
     });
 }
 
-// 🔹 REGISTRAR MOVIMENTAÇÃO
+// ======================
+// TROCAR PRODUTO
+// ======================
+function trocarProduto() {
+
+    const nome = document.getElementById("selecionarProduto").value;
+    atualizarCard(nome);
+
+}
+
+// ======================
+// SELECIONAR TIPO
+// ======================
+function selecionarTipo(tipo) {
+
+    tipoSelecionado = tipo;
+
+    document.getElementById("entrada").style.opacity =
+        tipo === "entrada" ? "1" : "0.5";
+
+    document.getElementById("saida").style.opacity =
+        tipo === "saida" ? "1" : "0.5";
+}
+
+// ======================
+// ATUALIZAR CARD
+// ======================
+function atualizarCard(nome) {
+
+    fetch(`http://localhost:5000/produto/${nome}`)
+    .then(res => res.json())
+    .then(p => {
+
+        document.getElementById("nomeProduto").innerText = p.nome;
+        document.getElementById("codigoProduto").innerText = p.codigo;
+
+        const estoque = p.estoque ?? 0;
+        const minimo = p.quantidade_minima ?? 0;
+
+        document.getElementById("estoqueAtual").innerText = estoque;
+        document.getElementById("estoqueMinimo").innerText = minimo;
+
+        const alerta = document.getElementById("alertaEstoque");
+
+        if (estoque === 0) {
+
+            alerta.innerText = "❌ Estoque zerado!";
+            alerta.style.background = "#f8d7da";
+            alerta.style.color = "#721c24";
+
+        } else if (estoque < minimo) {
+
+            alerta.innerText = "⚠ Estoque baixo!";
+            alerta.style.background = "#fff3cd";
+            alerta.style.color = "#856404";
+
+        } else {
+
+            alerta.innerText = "✅ Estoque normal";
+            alerta.style.background = "#d4edda";
+            alerta.style.color = "#155724";
+
+        }
+
+    });
+
+}
+
+// ======================
+// REGISTRAR MOVIMENTAÇÃO
+// ======================
 function registrar() {
 
-    const produtoNome = document.getElementById("produto").value;
+    const produto = document.getElementById("selecionarProduto").value;
     const quantidade = parseInt(document.getElementById("quantidade").value);
-    const data = new Date().toLocaleString("sv-SE").replace(" ", "T");
 
-    if (!produtoNome || !quantidade || !tipoSelecionado) {
-        alert("Preencha todos os campos!");
+    if (!produto || !quantidade || !tipoSelecionado) {
+
+        Swal.fire({
+            icon: "warning",
+            title: "Campos obrigatórios",
+            text: "Preencha todos os campos antes de continuar.",
+            confirmButtonColor: "#3085d6"
+        });
+
         return;
+    }
+
+    const estoqueAtual = parseInt(
+        document.getElementById("estoqueAtual").innerText
+    );
+
+    const estoqueMinimo = parseInt(
+        document.getElementById("estoqueMinimo").innerText
+    );
+
+    if (tipoSelecionado === "saida" && quantidade > estoqueAtual) {
+
+        Swal.fire({
+            icon: "error",
+            title: "Estoque insuficiente!",
+            text: "Você não tem essa quantidade disponível.",
+            confirmButtonColor: "#d33"
+        });
+
+        document.getElementById("mensagem").innerText =
+            "❌ Estoque insuficiente!";
+
+        return;
+    }
+
+    // 🚨 BLOQUEAR SAÍDA MAIOR QUE ESTOQUE
+    if (tipoSelecionado === "saida") {
+        const estoqueAtual = parseInt(document.getElementById("estoqueAtual").innerText);
+
+        if (quantidade > estoqueAtual) {
+            alert("❌ Não é possível fazer saída maior que o estoque!");
+            return;
+        }
     }
 
     fetch("http://localhost:5000/movimentacao", {
@@ -108,51 +180,90 @@ function registrar() {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            produto_nome: produtoNome,
+            produto_nome: produto,
             tipo: tipoSelecionado,
-            quantidade: quantidade,
-            data: data
+            quantidade: quantidade
         })
     })
     .then(res => res.json())
     .then(data => {
 
-        const msg = document.getElementById("mensagem");
+        document.getElementById("quantidade").value = "";
 
-        if (data.sucesso) {
+        atualizarCard(produto);
+        carregarHistorico();
 
-            msg.innerText = "✅ " + data.mensagem;
-            msg.style.color = "green";
+        let novoEstoque = estoqueAtual;
 
-            document.getElementById("produto").value = "";
-            document.getElementById("quantidade").value = "";
-
-            tipoSelecionado = "";
-
-            document.getElementById("entrada").style.opacity = "1";
-            document.getElementById("saida").style.opacity = "1";
-
-            carregarHistorico();
-
-            // 🔥 ATUALIZA CARD COM VALOR DO BANCO
-            const select = document.getElementById("selecionarProduto");
-            atualizarCard(select.value);
-
+        if (tipoSelecionado === "saida") {
+            novoEstoque = estoqueAtual - quantidade;
         } else {
-            msg.innerText = "❌ " + (data.erro || "Erro ao registrar");
-            msg.style.color = "red";
+            novoEstoque = estoqueAtual + quantidade;
         }
 
-    })
-    .catch(err => {
-        console.error(err);
-        document.getElementById("mensagem").innerText =
-            "Erro ao conectar com o servidor";
+        if (tipoSelecionado === "saida") {
+
+            if (novoEstoque === 0) {
+
+                Swal.fire({
+                    icon: "error",
+                    title: "Estoque zerado!",
+                    text: "Este produto ficou sem unidades.",
+                    confirmButtonColor: "#d33"
+                });
+
+                document.getElementById("mensagem").innerText =
+                    "❌ Estoque zerado!";
+
+            } else if (novoEstoque <= estoqueMinimo) {
+
+                Swal.fire({
+                    icon: "warning",
+                    title: "Estoque baixo!",
+                    text: `Quantidade abaixo do mínimo (${estoqueMinimo}). Restam ${novoEstoque} unidades.`,
+                    confirmButtonColor: "#f39c12"
+                });
+
+                document.getElementById("mensagem").innerText =
+                    `⚠️ Estoque abaixo do mínimo! Restam ${novoEstoque} unidades.`;
+
+            } else {
+
+                Swal.fire({
+                    icon: "success",
+                    title: "Movimentação registrada!",
+                    text: data.mensagem,
+                    confirmButtonColor: "#28a745"
+                });
+
+                document.getElementById("mensagem").innerText = data.mensagem;
+            }
+
+        } else {
+
+            Swal.fire({
+                icon: "success",
+                title: "Entrada registrada!",
+                text: data.mensagem,
+                confirmButtonColor: "#28a745"
+            });
+
+            document.getElementById("mensagem").innerText = data.mensagem;
+
+        }
+
     });
+
 }
 
-// 🔹 HISTÓRICO
+// ======================
+// HISTÓRICO
+// ======================
 function carregarHistorico() {
+
+    const produto = document.getElementById("produtoFiltro").value;
+    const tipo = document.getElementById("tipoFiltro").value;
+    const qtd = document.getElementById("quantidadeFiltro").value;
 
     fetch("http://localhost:5000/movimentacoes")
     .then(res => res.json())
@@ -161,34 +272,47 @@ function carregarHistorico() {
         const tabela = document.getElementById("tabela");
         tabela.innerHTML = "";
 
-        dados.forEach(item => {
+        dados
+        .filter(item => {
+            return (
+                (!produto || item.produto === produto) &&
+                (!tipo || item.tipo === tipo) &&
+                (!qtd || item.quantidade == qtd)
+            );
+        })
+        .forEach(item => {
 
-            const tipo = item.tipo.toUpperCase();
+            let dataFormatada = item.data;
+
+            if (item.data.includes("-")) {
+
+                const partes = item.data.split(" ");
+                const data = partes[0].split("-");
+                const hora = partes[1];
+
+                dataFormatada =
+                    data[2] + "/" +
+                    data[1] + "/" +
+                    data[0] + " " +
+                    hora;
+            }
 
             const linha = document.createElement("tr");
 
             linha.innerHTML = `
-                <td>${new Date(item.data).toLocaleString('pt-BR')}</td>
+                <td>${dataFormatada}</td>
                 <td>${item.produto}</td>
-                <td>
-                    <span class="tag ${tipo === 'ENTRADA' ? 'entrada' : 'saida'}">
-                        ${tipo === 'ENTRADA' ? '⬆ ENTRADA' : '⬇ SAÍDA'}
-                    </span>
-                </td>
+                <td>${item.tipo}</td>
                 <td>${item.quantidade}</td>
             `;
 
             tabela.appendChild(linha);
+
         });
 
-    })
-    .catch(err => {
-        console.error("Erro ao carregar histórico:", err);
     });
+
 }
 
-// 🔹 INICIAR
-window.onload = function() {
-    carregarHistorico();
-    atualizarCard("arroz"); // 🔥 já carrega certo ao abrir
-};
+// TEMPO REAL
+setInterval(carregarHistorico, 2000);

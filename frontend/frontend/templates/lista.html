@@ -3,26 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtos</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@380&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='lista.css') }}">
-    <title>Produtos</title>
 </head>
 <body>
+
+<button class="btn-voltar" onclick="history.back()">← Voltar</button>
 
 <div class="container">
     <h1>Produtos</h1>
 
-    <div class="input-container"> 
+    <button id="btnAbrirModal" class="btn-novo" type="button">
+        + Novo Produto
+    </button>
+
+    <div class="input-container">
         <input id="busca" placeholder="Buscar produto" type="text">
         <img width="28" height="28"
-        src="https://img.icons8.com/ios-filled/50/search--v1.png"/>
-    </div>  
+             src="https://img.icons8.com/ios-filled/50/search--v1.png"
+             alt="Buscar">
+    </div>
 
     <section class="menu">
         <h2 class="title">Lista de Produtos</h2>
-         
-        <div class="box-container">
 
+        <div class="box-container" id="listaProdutos">
+
+            <!-- PRODUTOS FIXOS -->
             <div class="box">
                 <h3>Arroz</h3>
                 <div class="text">Código</div>
@@ -38,7 +47,7 @@
             </div>
 
             <div class="box">
-                <h3>Açucar Refinado</h3>
+                <h3>Açúcar Refinado</h3>
                 <div class="text">Código</div>
                 <div class="text">ACR-003</div>
                 <img src="{{ url_for('static', filename='imagens/Açucar.png') }}">
@@ -94,28 +103,122 @@
             </div>
 
         </div>
-
     </section>
 </div>
 
-<!-- 🔥 JS SIMPLES E FUNCIONANDO -->
-<script>
-const input = document.getElementById('busca')
-const produtos = document.querySelectorAll('.box')
+<!-- MODAL -->
+<!-- MODAL -->
+<div id="modalProduto" class="modal">
+    <div class="modal-conteudo">
+        <span class="fechar" id="fecharModal">&times;</span>
 
-input.addEventListener('keyup', () => {
-    const termo = input.value.toLowerCase()
+        <h2>Cadastrar Produto</h2>
+
+        <input id="nomeProdutoModal" type="text" placeholder="Nome do Produto">
+        <input id="codigoProdutoModal" type="text" placeholder="Código">
+        <input id="quantidadeProdutoModal" type="number" placeholder="Quantidade inicial">
+        <input id="minimoProdutoModal" type="number" placeholder="Estoque mínimo">
+
+        <div class="botoes">
+    <button type="button" id="cancelarModal" class="btn-cancelar">
+        Cancelar
+    </button>
+
+    <button type="button" onclick="cadastrarProduto()" class="btn-salvar">
+        Salvar
+    </button>
+</div>
+    </div>
+</div>
+
+<script>
+const modal = document.getElementById("modalProduto");
+
+document.getElementById("btnAbrirModal").onclick = () => {
+    modal.style.display = "block";
+};
+
+document.getElementById("fecharModal").onclick = () => {
+    modal.style.display = "none";
+};
+
+document.getElementById("cancelarModal").onclick = () => {
+    modal.style.display = "none";
+};
+
+window.onclick = function(event) {
+    if (event.target === modal) {
+        modal.style.display = "none";
+    }
+};
+
+function cadastrarProduto() {
+
+    const nome = document.getElementById("nomeProdutoModal").value;
+    const codigo = document.getElementById("codigoProdutoModal").value;
+    const quantidade = document.getElementById("quantidadeProdutoModal").value;
+    const minimo = document.getElementById("minimoProdutoModal").value;
+
+    fetch("http://localhost:5000/produtos", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+            nome: nome,
+            codigo: codigo,
+            quantidade: quantidade,
+            quantidade_minima: minimo
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.mensagem);
+        modal.style.display = "none";
+        carregarProdutosNovos();
+    });
+
+}
+function carregarProdutosNovos() {
+    fetch("http://localhost:5000/produtos")
+    .then(res => res.json())
+    .then(resposta => {
+        const lista = resposta.dados;
+        const container = document.getElementById("listaProdutos");
+
+        document.querySelectorAll(".produto-dinamico").forEach(el => el.remove());
+
+        const produtosFixos = [
+            "Arroz","Feijão","Açúcar Refinado","Café","Óleo de Soja",
+            "Leite Integral","Sal","Ovos","Macarrão","Detergente"
+        ];
+
+        lista.forEach(produto => {
+            if (!produtosFixos.includes(produto.nome)) {
+                container.innerHTML += `
+                    <div class="box produto-dinamico">
+                        <h3>${produto.nome}</h3>
+                        <div class="text">Código</div>
+                        <div class="text">${produto.codigo}</div>
+                    </div>
+                `;
+            }
+        });
+    });
+}
+
+document.getElementById("busca").addEventListener("keyup", function() {
+    const termo = this.value.toLowerCase();
+    const produtos = document.querySelectorAll(".box");
 
     produtos.forEach(produto => {
-        const nome = produto.querySelector('h3').textContent.toLowerCase()
+        const nome = produto.querySelector("h3").textContent.toLowerCase();
+        produto.style.display = nome.includes(termo) ? "block" : "none";
+    });
+});
 
-        if (nome.includes(termo)) {
-            produto.style.display = "block"
-        } else {
-            produto.style.display = "none"
-        }
-    })
-})
+window.onload = carregarProdutosNovos;
 </script>
 
 </body>

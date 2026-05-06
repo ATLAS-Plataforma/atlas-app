@@ -10,128 +10,156 @@
 
 <body>
 
+<button class="btn-voltar" onclick="history.back()">← Voltar</button>
+
 <div class="fundo">
-  <div class="card-grande">
+    <div class="card-grande">
 
-    <!-- ESQUERDA -->
-    <div class="container">
+        <!-- LADO ESQUERDO -->
+        <div class="container">
 
-      <div class="titulo">
-        <img src="{{ url_for('static', filename='icone-de-deposito.webp') }}">
-        <h2>Registrar Movimentação</h2>
-      </div>
-
-      <label>Produto</label>
-      <input type="text" id="produto" placeholder="Digite o produto">
-
-      <label>Tipo de Movimentação</label>
-      <div class="tipo">
-        <button onclick="selecionarTipo('entrada')" id="entrada">Entrada</button>
-        <button onclick="selecionarTipo('saida')" id="saida">Saída</button>
-      </div>
-
-      <label>Quantidade</label>
-      <input type="number" id="quantidade" placeholder="Ex:10">
-
-      <label>Data</label>
-      <input type="date" id="dataMovimentacao">
-
-      <button class="registrar" onclick="registrar()">REGISTRAR MOVIMENTAÇÃO</button>
-      
-
-      <div class="alerta-azul">
-    <img src="https://cdn-icons-png.flaticon.com/512/471/471663.png" width="18" style="margin-bottom: 0; margin-right: 10px;">
-    <span><strong>Atenção:</strong> Para saída, será verificado se há quantidade suficiente em estoque.</span>
-</div>
-
-<p id="mensagem"></p>
-
-      <!-- HISTÓRICO -->
-      <div class="card">
-        <h3>Histórico</h3>
-
-        <div class="form">
-          <input type="text" id="produtoFiltro" placeholder="Produto">
-          <select id="tipoFiltro">
-            <option value="">Todos</option>
-            <option value="entrada">Entrada</option>
-            <option value="saida">Saída</option>
-          </select>
-          <input type="number" id="quantidadeFiltro" placeholder="Qtd">
-          <button onclick="carregarHistorico()">Atualizar</button>
-        </div>
-
-        <table>
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Produto</th>
-              <th>Tipo</th>
-              <th>Qtd</th>
-            </tr>
-          </thead>
-          <tbody id="tabela"></tbody>
-        </table>
-      </div>
-
-    </div>
-
-    <!-- DIREITA -->
-    <div class="lado-direito">
-
-      <!-- SELECT PRODUTO -->
-      <select id="selecionarProduto" onchange="trocarProduto()">
-  <option value="arroz">Arroz</option>
-  <option value="feijao">Feijão</option>
-  <option value="acucar">Açúcar</option>
-  <option value="cafe">Café</option>
-  <option value="oleo">Óleo</option>
-  <option value="leite">Leite</option>
-  <option value="sal">Sal</option>
-  <option value="ovos">Ovos</option>
-  <option value="macarrao">Macarrão</option>
-  <option value="detergente">Detergente</option>
-</select>
-
-      </select>
-
-      <div class="card-estoque">
-
-        <div class="titulo-estoque">
-          <span class="icone">🏠</span>
-          <h3>ESTOQUE ATUAL</h3>
-        </div>
-
-        <div class="box-estoque">
-          <h2 id="nomeProduto">ARROZ</h2>
-          <p>Código: <span id="codigoProduto">ARZ-001</span></p>
-
-          <div class="info-estoque">
-            <div>
-              <p>Atual</p>
-              <h1 id="estoqueAtual">12</h1>
+            <div class="titulo">
+                <img src="{{ url_for('static', filename='imagens/icone-estoque.jpg') }}">
+                <h2>Registrar Movimentação</h2>
             </div>
 
-            <div class="linha"></div>
+            <!-- PRODUTO -->
+            <label>Produto</label>
+            <select id="selecionarProduto" onchange="trocarProduto()"></select>
 
-            <div>
-              <p>Mínimo</p>
-              <h1 id="estoqueMinimo">5</h1>
+            <!-- TIPO -->
+            <label>Tipo de Movimentação</label>
+
+            <div class="tipo">
+                <button type="button" id="entrada" onclick="selecionarTipo('entrada')">
+                    Entrada
+                </button>
+
+                <button type="button" id="saida" onclick="selecionarTipo('saida')">
+                    Saída
+                </button>
             </div>
-          </div>
+
+            <!-- QUANTIDADE -->
+            <label>Quantidade</label>
+            <input type="number" id="quantidade" placeholder="Ex: 10">
+
+            <!-- BOTÃO -->
+            <button class="registrar" onclick="registrar()">
+                REGISTRAR MOVIMENTAÇÃO
+            </button>
+
+            <!-- ALERTA -->
+            <div class="alerta-azul">
+                <img
+                    src="https://cdn-icons-png.flaticon.com/512/471/471663.png"
+                    width="18"
+                    style="margin-right:10px;"
+                >
+
+                <span>
+                    <strong>Atenção:</strong>
+                    Para saída será verificado se há estoque suficiente.
+                </span>
+            </div>
+
+            <p id="mensagem"></p>
+
+            <!-- HISTÓRICO -->
+            <div class="card">
+
+                <h3>Histórico de movimentação</h3>
+
+                <div class="form">
+
+                    <select id="produtoFiltro">
+                        <option value="">Todos</option>
+                    </select>
+
+                    <select id="tipoFiltro">
+                        <option value="">Todos</option>
+                        <option value="entrada">Entrada</option>
+                        <option value="saida">Saída</option>
+                    </select>
+
+                    <input
+                        type="number"
+                        id="quantidadeFiltro"
+                        placeholder="Qtd"
+                    >
+
+                    <button type="button" onclick="carregarHistorico()">
+                        Atualizar
+                    </button>
+
+                </div>
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Produto</th>
+                            <th>Tipo</th>
+                            <th>Qtd</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="tabela"></tbody>
+
+                </table>
+
+            </div>
         </div>
 
-        <div class="alerta-amarelo" id="alertaEstoque">
-          ⚠️ Estoque baixo
-        </div>
+        <!-- LADO DIREITO -->
+        <div class="card-estoque">
 
-      </div>
+            <div class="titulo-estoque">
+                <span class="icone">📦</span>
+                <h3>ESTOQUE ATUAL</h3>
+            </div>
+
+            <div class="box-estoque">
+
+                <!-- NOME -->
+                <h2 id="nomeProduto">PRODUTO</h2>
+
+                <!-- CÓDIGO -->
+                <p>
+                    Código:
+                    <span id="codigoProduto">---</span>
+                </p>
+
+                <div class="info-estoque">
+
+                    <!-- ESTOQUE -->
+                    <div>
+                        <p>Quantidade Atual</p>
+                        <h1 id="estoqueAtual">0</h1>
+                    </div>
+
+                    <!-- ESTOQUE MINIMO -->
+                    <div>
+                        <p>Estoque Mínimo</p>
+                        <h1 id="estoqueMinimo">0</h1>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ALERTA -->
+            <div class="alerta-amarelo" id="alertaEstoque">
+                Estoque carregado
+            </div>
+
+        </div>
 
     </div>
-
-  </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{{ url_for('static', filename='movimentacao.js') }}"></script>
 
 </body>

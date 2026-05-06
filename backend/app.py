@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request, render_template
 from db import conectar
 from login import login_bp
 from lista import lista_bp
+from email_service import enviar_email_alerta
 
 app = Flask(
     __name__,
@@ -10,13 +11,13 @@ app = Flask(
 )
 
 # ==============================
-# 🔹 BLUEPRINTS
+# BLUEPRINTS
 # ==============================
 app.register_blueprint(login_bp)
 app.register_blueprint(lista_bp)
 
 # ==============================
-# 🔹 PÁGINAS HTML
+# PÁGINAS
 # ==============================
 @app.route('/')
 def home():
@@ -39,7 +40,7 @@ def lista_page():
     return render_template("lista.html")
 
 # ==============================
-# 🔹 LISTAR PRODUTOS
+# LISTAR PRODUTOS
 # ==============================
 @app.route('/produtos', methods=['GET'])
 def listar_produtos():
@@ -47,16 +48,23 @@ def listar_produtos():
     conn = conectar()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT id, nome, codigo, quantidade FROM produtos")
+    cursor.execute("""
+        SELECT id, nome, codigo, quantidade, quantidade_minima
+        FROM produtos
+        ORDER BY id
+    """)
+
     produtos = cursor.fetchall()
 
     lista = []
+
     for p in produtos:
         lista.append({
             "id": p[0],
             "nome": p[1],
             "codigo": p[2],
-            "quantidade": p[3]
+            "quantidade": p[3],
+            "quantidade_minima": p[4]
         })
 
     cursor.close()
@@ -67,9 +75,8 @@ def listar_produtos():
         "dados": lista
     })
 
-
 # ==============================
-# 🔹 BUSCAR PRODUTO (ESTOQUE)
+# BUSCAR PRODUTO
 # ==============================
 @app.route('/produto/<nome>', methods=['GET'])
 def buscar_produto(nome):
@@ -78,9 +85,9 @@ def buscar_produto(nome):
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT nome, codigo, quantidade
+        SELECT nome, codigo, quantidade, quantidade_minima
         FROM produtos
-        WHERE nome = %s
+        WHERE LOWER(nome) = LOWER(%s)
     """, (nome,))
 
     produto = cursor.fetchone()
@@ -94,12 +101,12 @@ def buscar_produto(nome):
     return jsonify({
         "nome": produto[0],
         "codigo": produto[1],
-        "estoque": produto[2]
+        "estoque": produto[2],
+        "quantidade_minima": produto[3]
     })
 
-
 # ==============================
-# 🔹 REGISTRAR MOVIMENTAÇÃO
+# REGISTRAR MOVIMENTAÇÃO
 # ==============================
 @app.route('/movimentacao', methods=['POST'])
 def registrar_movimentacao():
@@ -110,47 +117,77 @@ def registrar_movimentacao():
     tipo = dados.get('tipo')
     quantidade = dados.get('quantidade')
     observacao = dados.get('observacao', '')
-    data = dados.get('data')
 
     if not produto_nome:
-        return jsonify({"erro": "Nome do produto é obrigatório"}), 400
+        return jsonify({"erro": "Produto obrigatório"}), 400
 
     if tipo not in ['entrada', 'saida']:
-        return jsonify({"erro": "Tipo deve ser 'entrada' ou 'saida'"}), 400
+        return jsonify({"erro": "Tipo inválido"}), 400
 
     if not quantidade or quantidade <= 0:
-        return jsonify({"erro": "Quantidade deve ser maior que zero"}), 400
+        return jsonify({"erro": "Quantidade inválida"}), 400
 
     conn = conectar()
     cursor = conn.cursor()
 
     try:
-
-        # registrar movimentação
+        # busca estoque atual e mínimo
         cursor.execute("""
-        INSERT INTO movimentacoes (produto_nome, tipo, quantidade, observacao, data)
-        VALUES (%s, %s, %s, %s, %s)
-         RETURNING id
-""", (produto_nome, tipo, quantidade, observacao, data))
+            SELECT quantidade, quantidade_minima
+            FROM produtos
+            WHERE LOWER(nome)=LOWER(%s)
+        """, (produto_nome,))
+
+        produto = cursor.fetchone()
+
+        if not produto:
+            return jsonify({"erro": "Produto não encontrado"}), 404
+
+        estoque_atual = produto[0]
+        estoque_minimo = produto[1]
+
+        if tipo == "saida" and quantidade > estoque_atual:
+            return jsonify({"erro": "Estoque insuficiente"}), 400
+
+        # salva movimentação
+        cursor.execute("""
+            INSERT INTO movimentacoes
+            (produto_nome, tipo, quantidade, observacao, data)
+            VALUES (%s, %s, %s, %s, NOW())
+            RETURNING id
+        """, (produto_nome, tipo, quantidade, observacao))
 
         movimentacao_id = cursor.fetchone()[0]
 
-        # atualizar estoque
+        # calcula novo estoque
         if tipo == "entrada":
-
-            cursor.execute("""
-                UPDATE produtos
-                SET quantidade = quantidade + %s
-                WHERE LOWER(nome)= LOWER(%s)
-            """, (quantidade, produto_nome))
-
+            novo_estoque = estoque_atual + quantidade
         else:
+            novo_estoque = estoque_atual - quantidade
 
-            cursor.execute("""
-                UPDATE produtos
-                SET quantidade = quantidade - %s
-                WHERE LOWER(nome)= LOWER(%s)
-            """, (quantidade, produto_nome))
+        # atualiza estoque
+        cursor.execute("""
+            UPDATE produtos
+            SET quantidade = %s
+            WHERE LOWER(nome)=LOWER(%s)
+        """, (novo_estoque, produto_nome))
+
+        # envia email apenas em saída
+        if tipo == "saida":
+
+            if novo_estoque == 0:
+                enviar_email_alerta(
+                    produto_nome,
+                    novo_estoque,
+                    "ESTOQUE ZERADO"
+                )
+
+            elif novo_estoque <= estoque_minimo:
+                enviar_email_alerta(
+                    produto_nome,
+                    novo_estoque,
+                    "ESTOQUE BAIXO"
+                )
 
         conn.commit()
 
@@ -158,64 +195,63 @@ def registrar_movimentacao():
             "sucesso": True,
             "mensagem": "Movimentação registrada com sucesso!",
             "id": movimentacao_id
-        }), 201
+        })
 
     except Exception as e:
-
         conn.rollback()
-        print("❌ ERRO POST:", e)
-
         return jsonify({"erro": str(e)}), 500
 
     finally:
-
         cursor.close()
         conn.close()
 
+# ==============================
+# LISTAR MOVIMENTAÇÕES
+# ==============================
+# COLE EXATAMENTE ISSO NO BACKEND
 
-# ==============================
-# 🔹 LISTAR MOVIMENTAÇÕES
-# ==============================
 @app.route('/movimentacoes', methods=['GET'])
 def listar_movimentacoes():
 
     conn = conectar()
     cursor = conn.cursor()
 
-    try:
-        cursor.execute("""
-            SELECT id, produto_nome, tipo, quantidade, observacao, data
-            FROM movimentacoes
-            ORDER BY data DESC
-        """)
+    cursor.execute("""
+        SELECT 
+            id,
+            produto_nome,
+            tipo,
+            quantidade,
 
-        resultados = cursor.fetchall()
+            CASE
+                WHEN data IS NULL THEN ''
+                ELSE TO_CHAR(data, 'DD/MM/YYYY HH24:MI:SS')
+            END
 
-        movimentacoes = []
+        FROM movimentacoes
+        ORDER BY id DESC
+    """)
 
-        for row in resultados:
-            movimentacoes.append({
-                "id": row[0],
-                "produto": row[1],
-                "tipo": row[2],
-                "quantidade": row[3],
-                "observacao": row[4],
-                "data": str(row[5])
-            })
+    rows = cursor.fetchall()
 
-        return jsonify(movimentacoes)
+    lista = []
 
-    except Exception as e:
-        print("❌ ERRO GET:", e)
-        return jsonify({"erro": str(e)}), 500
+    for row in rows:
 
-    finally:
-        cursor.close()
-        conn.close()
+        lista.append({
+            "id": row[0],
+            "produto": row[1],
+            "tipo": row[2],
+            "quantidade": row[3],
+            "data": row[4]
+        })
 
+    cursor.close()
+    conn.close()
 
+    return jsonify(lista)
 # ==============================
-# 🚀 RODAR SERVIDOR
+# RODAR
 # ==============================
 if __name__ == '__main__':
     app.run(port=5000, host='localhost', debug=True)
